@@ -32,9 +32,9 @@ data PD32 = PD32
     }
     deriving (Eq, Show)
 
-type SystemState = StateT PD32 IO ()
+type SystemState = State PD32 ()
 
-getMask :: PD32 -> (LWord -> LWord)
+getMask :: PD32 -> LWord -> LWord
 getMask = maskZ . size . ctrlUnit
 
 -- TODO: check register index
