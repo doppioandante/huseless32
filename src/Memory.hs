@@ -17,5 +17,5 @@ import Common
 class RandomAccessible a b where
     readWord :: a -> b -> LWord
     writeWord :: a -> b -> LWord -> a
-    checkAddress :: Address -> a -> Maybe b
+    checkAddress :: a -> Address -> Maybe b
 

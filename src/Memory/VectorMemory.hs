@@ -19,7 +19,7 @@ newtype VectorMemory = VectorMemory (V.Vector LWord) deriving (Eq, Show)
 instance RandomAccessible VectorMemory Int where
     readWord (VectorMemory v) index = v V.! index
     writeWord (VectorMemory v) index word = VectorMemory $ v V.// [(index, word)]
-    checkAddress address (VectorMemory v) =
+    checkAddress (VectorMemory v) address =
         if address `mod` 4 == 0 && index <= (V.length v)
             then Just index
             else Nothing

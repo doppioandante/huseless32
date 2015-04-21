@@ -13,7 +13,7 @@ import Data.Bits ((.&.))
 
 import Common
 
-data Instruction = Instruction
+data RawInstruction = RawInstruction
     {
         instrClass :: Word8, -- C
         instrCode :: Word8, -- I

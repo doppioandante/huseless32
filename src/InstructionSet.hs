@@ -5,16 +5,16 @@ import Common
 import Instruction
 import InstructionSet.Control
 import InstructionSet.Data
-import SystemState
+import System
 
-getAction :: Int -> Word8 -> Maybe (Instruction -> SystemState)
+getAction :: Monad m => Int -> Word8 -> Maybe (Instruction -> System m ())
 getAction instrClass instrCode = do
     instrTable <-  if instrClass <= 7
                       then Just $ instructionTables !! instrClass
                       else Nothing
     lookup instrCode instrTable
 
-instructionTables :: [[(Word8, (Instruction -> SystemState))]]
+instructionTables :: Monad m => [[(Word8, (Instruction -> System m ()))]]
 instructionTables = [
     controlInstructionTable,
     dataInstructionTable

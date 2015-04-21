@@ -1,12 +1,13 @@
 module InstructionSet.Control
 where
 
+import Control.Monad.Except
 
 import Common
 import Instruction
-import SystemState
+import System
 
-controlInstructionTable :: [(Word8, Instruction -> SystemState)]
+controlInstructionTable :: Monad m => [(Word8, Instruction -> System m ())]
 controlInstructionTable = [
     (0, opNOP),
     (1, opNOP),
@@ -15,7 +16,17 @@ controlInstructionTable = [
     (31, opNOP)
     ]
 
-opNOP :: Instruction -> SystemState
-opNOP _ = do return ()
+opHALT :: Monad m => Instruction -> System m ()
+opHalt _ = throwError HaltExecution
 
+opNOP :: Monad m => Instruction -> System m ()
+opNOP _ = return ()
 
+opRESET :: Monad m => Instruction -> System m ()
+opRESET _ = undefined
+
+opTRAP :: Monad m => Instruction -> System m ()
+opTRAP = undefined
+
+opTRACE :: Monad m => Instruction -> System m ()
+opTRACE = throwError Trace
