@@ -17,7 +17,7 @@ controlInstructionTable = [
     ]
 
 opHALT :: Monad m => Instruction -> System m ()
-opHalt _ = throwError HaltExecution
+opHALT _ = throwError HaltExecution
 
 opNOP :: Monad m => Instruction -> System m ()
 opNOP _ = return ()
@@ -26,7 +26,7 @@ opRESET :: Monad m => Instruction -> System m ()
 opRESET _ = undefined
 
 opTRAP :: Monad m => Instruction -> System m ()
-opTRAP = undefined
+opTRAP _ = undefined
 
 opTRACE :: Monad m => Instruction -> System m ()
-opTRACE = throwError Trace
+opTRACE _ = throwError Trace

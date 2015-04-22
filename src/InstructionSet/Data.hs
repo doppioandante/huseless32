@@ -7,7 +7,6 @@ import InstructionSet.Control
 import System
 
 dataInstructionTable :: Monad m => [(Word8, Instruction -> System m ())]
-dataInstructionTable = []
 dataInstructionTable = [
     (0, opMOV),
     (1, opNOP),
@@ -16,9 +15,6 @@ dataInstructionTable = [
     (4, opNOP)
     ]
 
-opMOV :: Instruction -> System m ()
-opMOV instr = do
-    let sourceReg = fromIntegral (sourceRegister instr) :: Int
-        destReg = fromIntegral (destRegister instr) :: Int
-    case 
-    readSource
+opMOV :: Monad m => Instruction -> System m ()
+opMOV instr = readSource (sourceAMode instr) (size instr)
+              >>= writeDest (destAMode instr) (size instr)

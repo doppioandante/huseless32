@@ -7,8 +7,9 @@ import Control.Monad.Trans.Class (lift)
 import Data.Bits ((.&.))
 
 import Common
-import PD32
+import Instruction
 import Memory.VectorMemory
+import PD32
 
 data Failure = Trace | HaltExecution | InvalidMemoryAddress | InvalidOpCode
   deriving (Eq, Show)
@@ -59,18 +60,6 @@ readAtPCAndIncrement = do
 
 getExtensionLWord :: Monad m => System m LWord
 getExtensionLWord = readAtPCAndIncrement
-
-data AddressingMode =
-    AMRegister Int |
-    AMImmediate |
-    AMAbsolute |
-    AMIndirectRegister Int |
-    AMRegisterOffset Int |
-    AMRelativeOffset |
-    AMIncrementing Int |
-    AMDecrementing Int
-
-data Z = ZByte | ZWord | ZLWord deriving (Eq, Show, Read)
 
 mask :: Z -> LWord -> LWord
 mask z = case z of
