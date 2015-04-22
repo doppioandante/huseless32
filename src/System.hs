@@ -1,10 +1,12 @@
 module System
 where
 
+import Control.Applicative ((<$>))
+import Data.Bits ((.&.))
+import Control.Monad (liftM)
 import Control.Monad.Except
 import Control.Monad.State.Lazy
-import Control.Monad.Trans.Class (lift)
-import Data.Bits ((.&.))
+import Data.Int (Int8, Int16, Int32)
 
 import Common
 import Instruction
@@ -16,24 +18,22 @@ data Failure = Trace | HaltExecution | InvalidMemoryAddress | InvalidOpCode
 
 type System m a = ExceptT Failure (StateT PD32 m) a
 
-
-
 -- TODO: check register index
 readRegister :: Int -> PD32 -> LWord
 readRegister idx pd32 = (cpuRegisters pd32) !! idx
 
 writeRegister :: Monad m => Int -> LWord -> System m ()
 writeRegister idx value = do
-    pd32 <- lift get
+    pd32 <- get
     let registers' = changeSelectedRegister . cpuRegisters $ pd32
-    lift $ put pd32 { cpuRegisters = registers' }
+    put pd32 { cpuRegisters = registers' }
     where
         changeSelectedRegister rs =
             take idx rs ++ [value] ++ drop (idx + 1) rs
 
 readMemory :: Monad m => Address -> System m LWord
 readMemory addr = do
-    pd32 <- lift get
+    pd32 <- get
     let mem = memory pd32
 
     case checkAddress mem addr of
@@ -42,18 +42,18 @@ readMemory addr = do
 
 writeMemory :: Monad m => Address -> LWord -> System m ()
 writeMemory addr value = do
-    pd32 <- lift get
+    pd32 <- get
     let mem = memory pd32
 
     case checkAddress mem addr of
       Nothing -> throwError InvalidMemoryAddress
-      Just idx -> lift $ put pd32 {
+      Just idx -> put pd32 {
           memory = writeWord mem (idx::LegalAddress) value
           }
 
 readAtPCAndIncrement :: Monad m => System m LWord
 readAtPCAndIncrement = do
-    pd32 <- lift get
+    pd32 <- get
     let oldPc = pc pd32
     put pd32 { pc = oldPc + 4 }
     readMemory oldPc
@@ -73,9 +73,25 @@ byteSize z = case z of
                ZWord -> 2
                ZLWord -> 4
 
+extendSign :: Z -> LWord -> LWord
+extendSign ZByte  = fromIntegral . (fromIntegral :: LWord -> Int8)
+extendSign ZWord  = fromIntegral . (fromIntegral :: LWord -> Int16)
+extendSign ZLWord = fromIntegral . (fromIntegral :: LWord -> Int32) -- identity
+
+needsSignExtension :: Instruction -> Bool
+needsSignExtension instr =
+    case destAMode instr of
+      AMRegister _ -> True
+      _ -> False
+
+doSignExtension :: Monad m => Instruction -> LWord -> System m LWord
+doSignExtension instr = return . if needsSignExtension instr
+                                    then extendSign (size instr)
+                                    else id
+
 readSource :: Monad m => AddressingMode -> Z -> System m LWord
 readSource addrMode z = do
-    pd32 <- lift get
+    pd32 <- get
 
     result <- case addrMode of
         AMRegister reg -> return $ readRegister reg pd32
@@ -108,7 +124,7 @@ readSource addrMode z = do
 
 writeDest :: Monad m => AddressingMode -> Z -> LWord -> System m ()
 writeDest addrMode z unmaskedValue = do
-    pd32 <- lift get
+    pd32 <- get
     let value = mask z unmaskedValue
 
     case addrMode of
@@ -135,4 +151,17 @@ writeDest addrMode z unmaskedValue = do
             let address = (readRegister reg pd32) - byteSize z
             writeRegister reg address
             writeMemory address value
+
+modifySR :: Monad m => (StatusRegister -> StatusRegister) -> System m ()
+modifySR modify = do
+    pd32 <- get
+    let statusRegister' = modify $ statusRegister pd32
+    put pd32 { statusRegister = statusRegister' }
+
+setCarry value = modifySR (\sr -> sr {carry = value})
+setNegative value = modifySR (\sr -> sr {negative = value})
+setZero value = modifySR (\sr -> sr {zero = value})
+setOverflow value = modifySR (\sr -> sr {overflow = value})
+setParity value = modifySR (\sr -> sr {parity = value})
+setInterrupt value = modifySR (\sr -> sr {interrupt = value})
 

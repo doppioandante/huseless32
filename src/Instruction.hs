@@ -40,6 +40,7 @@ data AddressingMode =
     AMDecrementing Int
     deriving (Eq, Show, Read)
 
+
 data Z = ZByte | ZWord | ZLWord deriving (Eq, Show, Read)
 
 data Instruction = Instruction
@@ -58,19 +59,19 @@ decodeInstruction :: LWord -> Instruction
 decodeInstruction op =
     decodeRawInstruction . (`runGet` (encode op)) . runBitGet . block $
         RawInstruction <$> word8 3
-                       <*> word8 5
-                       <*> word8 8
-                       <*> word8 2
-                       <*> word8 2
-                       <*> word8 3
-                       <*> word8 3
-                       <*> word8 3
-                       <*> word8 3
+                    <*> word8 5
+                    <*> word8 8
+                    <*> word8 2
+                    <*> word8 2
+                    <*> word8 3
+                    <*> word8 3
+                    <*> word8 3
+                    <*> word8 3
 
 decodeRawInstruction :: RawInstruction -> Instruction
 decodeRawInstruction =
     Instruction <$> decodeClass . rawClass
-                <*> decodeCode . rawCode
+                <*> decodeInstr . rawCode
                 <*> a1
                 <*> a2
                 <*> decodeZ . z
@@ -78,7 +79,7 @@ decodeRawInstruction =
                 <*> (decodeMode <$> dM <*> dR)
 
 decodeClass = fromIntegral :: Word8 -> Int
-decodeCode = fromIntegral :: Word8 -> Int
+decodeInstr = fromIntegral :: Word8 -> Int
 decodeZ bits =
     case bits of
       0 -> ZByte

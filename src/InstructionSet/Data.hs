@@ -15,6 +15,8 @@ dataInstructionTable = [
     (4, opNOP)
     ]
 
+-- TODO: set status resgister
 opMOV :: Monad m => Instruction -> System m ()
 opMOV instr = readSource (sourceAMode instr) (size instr)
+              >>= doSignExtension instr
               >>= writeDest (destAMode instr) (size instr)
