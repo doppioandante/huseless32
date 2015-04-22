@@ -19,8 +19,10 @@ data Failure = Trace | HaltExecution | InvalidMemoryAddress | InvalidOpCode
 type System m a = ExceptT Failure (StateT PD32 m) a
 
 -- TODO: check register index
-readRegister :: Int -> PD32 -> LWord
-readRegister idx pd32 = (cpuRegisters pd32) !! idx
+readRegister :: Monad m => Int -> System m LWord
+readRegister idx = do
+    pd32 <- get
+    return $ (cpuRegisters pd32) !! idx
 
 writeRegister :: Monad m => Int -> LWord -> System m ()
 writeRegister idx value = do
@@ -30,6 +32,7 @@ writeRegister idx value = do
     where
         changeSelectedRegister rs =
             take idx rs ++ [value] ++ drop (idx + 1) rs
+
 
 readMemory :: Monad m => Address -> System m LWord
 readMemory addr = do
@@ -94,29 +97,31 @@ readSource addrMode z = do
     pd32 <- get
 
     result <- case addrMode of
-        AMRegister reg -> return $ readRegister reg pd32
+        AMRegister reg -> readRegister reg
         AMImmediate -> do
             value <- getExtensionLWord
             return value
         AMAbsolute -> do
             address <- getExtensionLWord
             readMemory address
-        AMIndirectRegister reg -> do
-            let address = readRegister reg pd32
-            readMemory address
+        AMIndirectRegister reg ->
+            readRegister reg >>=
+            readMemory
         AMRegisterOffset reg -> do
             offset <- getExtensionLWord
-            readMemory $ (readRegister reg pd32) + (byteSize z) * offset
+            base <- readRegister reg
+            readMemory $ base + (byteSize z) * offset
         AMRelativeOffset -> do
             let oldPc = pc pd32
             offset <- getExtensionLWord
             readMemory $ oldPc + (byteSize ZLWord) * offset
         AMIncrementing reg -> do
-            let address = readRegister reg pd32
+            address <- readRegister reg
             writeRegister reg (address + byteSize z)
             readMemory address
         AMDecrementing reg -> do
-            let address = (readRegister reg pd32) - byteSize z
+            regValue <- readRegister reg
+            let address = regValue - byteSize z
             writeRegister reg address
             readMemory address
 
@@ -129,26 +134,28 @@ writeDest addrMode z unmaskedValue = do
 
     case addrMode of
         AMRegister reg -> writeRegister reg value
-        AMImmediate -> throwError InvalidOpCode
+        AMImmediate -> error "writing to an immediate value"
         AMAbsolute -> do
             address <- getExtensionLWord
             writeMemory address value
         AMIndirectRegister reg -> do
-            let address = readRegister reg pd32
+            address <- readRegister reg
             writeMemory address value
         AMRegisterOffset reg -> do
             offset <- getExtensionLWord
-            writeMemory ((readRegister reg pd32) + (byteSize z) * offset) value
+            base <- readRegister reg
+            writeMemory (base + (byteSize z) * offset) value
         AMRelativeOffset -> do
             let oldPc = pc pd32
             offset <- getExtensionLWord
             writeMemory (oldPc + (byteSize ZLWord) * offset) value
         AMIncrementing reg -> do
-            let address = readRegister reg pd32
+            address <- readRegister reg
             writeRegister reg (address + byteSize z)
             writeMemory address value
         AMDecrementing reg -> do
-            let address = (readRegister reg pd32) - byteSize z
+            regValue <- readRegister reg
+            let address = regValue - (byteSize z)
             writeRegister reg address
             writeMemory address value
 
