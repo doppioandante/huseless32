@@ -10,8 +10,10 @@ import Data.Int (Int8, Int16, Int32)
 
 import Common
 import Instruction
-import Memory.VectorMemory
-import PD32
+import System.Memory.VectorMemory
+import System.PD32
+import System.ALUOps
+import System.StatusRegister
 
 data Failure = Trace | HaltExecution | InvalidMemoryAddress | InvalidOpCode
   deriving (Eq, Show)
@@ -187,3 +189,18 @@ writeSR word = sequence_ $
         [testBit word i | i <- [0..]]
 
 
+aluCompute :: Monad m =>
+              (LWord -> LWord -> LWord) ->
+              LWord ->
+              LWord -> -- value of destination register
+              System m LWord
+aluCompute op value1 value2 =
+    let result = op value1 value2
+        (c, n, z, o, p) = standardConditionsOn value2 result
+     in do
+        setCarry c
+        setNegative n
+        setZero z
+        setOverflow o
+        setParity p
+        return result

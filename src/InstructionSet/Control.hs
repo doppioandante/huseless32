@@ -7,13 +7,13 @@ import Common
 import Instruction
 import System
 
-controlInstructionTable :: Monad m => [(Word8, Instruction -> System m ())]
+controlInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
 controlInstructionTable = [
-    (0, opNOP),
+    (0, opHALT),
     (1, opNOP),
-    (2, opNOP),
-    (3, opNOP),
-    (31, opNOP)
+    (2, opRESET),
+    (3, opTRAP),
+    (31, opTRACE)
     ]
 
 opHALT :: Monad m => Instruction -> System m ()

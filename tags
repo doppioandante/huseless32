@@ -1,9 +1,18 @@
+		/home/enrico/projects/huseless32/huseless32/src/current.vim	/^inoremap <expr> 	 pumvisible() ? "\\" : "\\	"$/;"	m
 !_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
 !_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+0	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^normal! 0$/;"	m
+030|	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^normal! 030|$/;"	m
+089|	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^  normal! 089|$/;"	m
+<Down>	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^inoremap <expr> <Down> pumvisible() ? "\\" : "\\<Down>"$/;"	m
+<Nul>	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^inoremap <Nul> $/;"	m
+<Plug>NetrwBrowseX	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^nnoremap <silent> <Plug>NetrwBrowseX :call netrw#NetrwBrowseX(expand("<cfile>"),0)$/;"	m
+<S-Tab>	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^inoremap <expr> <S-Tab> pumvisible() ? "\\" : "\\<S-Tab>"$/;"	m
+<Up>	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^inoremap <expr> <Up> pumvisible() ? "\\" : "\\<Up>"$/;"	m
 BOUNDS_CHECK	/home/enrico/projects/huseless32/huseless32/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/vecto_6aaU0nnmvuo8Fm695YhjzM/include/vector.h	15;"	d
 CHECK	/home/enrico/projects/huseless32/huseless32/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/vecto_6aaU0nnmvuo8Fm695YhjzM/include/vector.h	14;"	d
 CURRENT_PACKAGE_KEY	/home/enrico/projects/huseless32/huseless32/dist/build/autogen/cabal_macros.h	129;"	d
@@ -51,6 +60,7 @@ MIN_VERSION_vector	/home/enrico/projects/huseless32/huseless32/dist/build/autoge
 MIN_VERSION_vector	/home/enrico/projects/huseless32/huseless32/dist/dist-sandbox-55774dfa/build/autogen/cabal_macros.h	47;"	d
 PHASE_INNER	/home/enrico/projects/huseless32/huseless32/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/vecto_6aaU0nnmvuo8Fm695YhjzM/include/vector.h	2;"	d
 PHASE_STREAM	/home/enrico/projects/huseless32/huseless32/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/vecto_6aaU0nnmvuo8Fm695YhjzM/include/vector.h	1;"	d
+SessionLoad	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let SessionLoad = 1$/;"	v
 TOOL_VERSION_cpphs	/home/enrico/projects/huseless32/huseless32/dist/build/autogen/cabal_macros.h	53;"	d
 TOOL_VERSION_cpphs	/home/enrico/projects/huseless32/huseless32/dist/dist-sandbox-55774dfa/build/autogen/cabal_macros.h	53;"	d
 TOOL_VERSION_gcc	/home/enrico/projects/huseless32/huseless32/dist/build/autogen/cabal_macros.h	60;"	d
@@ -88,4 +98,18 @@ VERSION_transformers	/home/enrico/projects/huseless32/huseless32/dist/build/auto
 VERSION_transformers	/home/enrico/projects/huseless32/huseless32/dist/dist-sandbox-55774dfa/build/autogen/cabal_macros.h	39;"	d
 VERSION_vector	/home/enrico/projects/huseless32/huseless32/dist/build/autogen/cabal_macros.h	46;"	d
 VERSION_vector	/home/enrico/projects/huseless32/huseless32/dist/dist-sandbox-55774dfa/build/autogen/cabal_macros.h	46;"	d
+\d	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^nnoremap \\d :YcmShowDetailedDiagnostic$/;"	m
+\f	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^nnoremap \\f :NERDTreeToggle$/;"	m
+\t	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^nnoremap \\t :TagbarToggle$/;"	m
+gx	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^nmap gx <Plug>NetrwBrowseX$/;"	m
 haskell_primitive_memops_h	/home/enrico/projects/huseless32/huseless32/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/primi_4EFP5cvZDduIYCPc8lT1lV/include/primitive-memops.h	2;"	d
+s:c	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:c = 89 - ((45 * winwidth(0) + 44) \/ 89)$/;"	v
+s:cpo_save	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:cpo_save=&cpo$/;"	v
+s:l	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:l = 1003 - ((2 * winheight(0) + 6) \/ 13)$/;"	v
+s:l	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:l = 185 - ((25 * winheight(0) + 21) \/ 42)$/;"	v
+s:l	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:l = 19 - ((0 * winheight(0) + 9) \/ 18)$/;"	v
+s:l	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:l = 30 - ((22 * winheight(0) + 11) \/ 23)$/;"	v
+s:so_save	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:so_save = &so | let s:siso_save = &siso | set so=0 siso=0$/;"	v
+s:sx	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^let s:sx = expand("<sfile>:p:r")."x.vim"$/;"	v
+s:wipebuf	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^  let s:wipebuf = bufnr('%')$/;"	v
+zt	/home/enrico/projects/huseless32/huseless32/src/current.vim	/^normal! zt$/;"	m

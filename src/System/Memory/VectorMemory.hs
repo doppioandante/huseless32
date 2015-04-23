@@ -1,5 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-module Memory.VectorMemory
+module System.Memory.VectorMemory
 (
 VectorMemory,
 readWord,
@@ -12,7 +12,7 @@ where
 import qualified Data.Vector as V
 
 import Common
-import Memory
+import System.Memory
 
 newtype VectorMemory = VectorMemory (V.Vector LWord) deriving (Eq, Show)
 

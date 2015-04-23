@@ -8,7 +8,7 @@ import Instruction
 import InstructionSet.Control
 import System
 
-dataInstructionTable :: Monad m => [(Word8, Instruction -> System m ())]
+dataInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
 dataInstructionTable = [
     (0, opMOV),
     (1, opMOVFRSR),

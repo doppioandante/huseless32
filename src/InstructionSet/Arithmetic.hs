@@ -2,7 +2,6 @@ module InstructionSet.Arithmetic where
 
 import Common
 import Instruction
-import InstructionSet.Control (opNOP)
 import System
 
 arithmeticInstructionTable :: Monad m => [(Int, Instruction -> System m())]

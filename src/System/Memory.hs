@@ -1,5 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
-module Memory
+module System.Memory
 (
 RandomAccessible,
 readWord,
