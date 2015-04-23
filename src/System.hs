@@ -2,8 +2,8 @@ module System
 where
 
 import Control.Applicative ((<$>))
-import Data.Bits ((.&.))
-import Control.Monad (liftM)
+import Data.Bits ((.&.), zeroBits, bit, setBit, testBit)
+import Control.Monad (sequence_)
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Data.Int (Int8, Int16, Int32)
@@ -171,4 +171,19 @@ setZero value = modifySR (\sr -> sr {zero = value})
 setOverflow value = modifySR (\sr -> sr {overflow = value})
 setParity value = modifySR (\sr -> sr {parity = value})
 setInterrupt value = modifySR (\sr -> sr {interrupt = value})
+
+readSR :: Monad m => System m LWord
+readSR = do
+    pd32 <- get
+    let (StatusRegister c n z o p i) = statusRegister pd32
+        indeces = map snd $ filter fst $ zip [c, n, z, o, p, i] [0..] :: [Int]
+
+    return $ foldl setBit zeroBits indeces
+
+writeSR :: Monad m => LWord -> System m ()
+writeSR word = sequence_ $
+    zipWith ($)
+        [setCarry, setNegative, setZero, setOverflow, setParity, setInterrupt]
+        [testBit word i | i <- [0..]]
+
 
