@@ -67,7 +67,7 @@ getExtensionLWord = readAtPCAndIncrement
 mask :: Z -> LWord -> LWord
 mask z = case z of
               ZByte -> (.&. 0x000000FF)
-              ZWord -> (.&. 0x0000FFFF)
+              ZWord -> (.&. 0x0000FFFF) -- holy shit endianness
               ZLWord -> id
 
 byteSize :: Z -> LWord
@@ -182,7 +182,7 @@ readSR = do
 
 writeSR :: Monad m => LWord -> System m ()
 writeSR word = sequence_ $
-    zipWith ($)
+    zipWith ($) -- TODO: find better approach, maybe with Applicative over StatusRegister
         [setCarry, setNegative, setZero, setOverflow, setParity, setInterrupt]
         [testBit word i | i <- [0..]]
 
