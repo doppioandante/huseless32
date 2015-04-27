@@ -20,26 +20,36 @@ dataInstructionTable = [
 
 -- TODO: set status resgister
 opMOV :: Monad m => Instruction -> System m ()
-opMOV instr = readSource (sourceAMode instr) (size instr)
-              >>= doSignExtension instr
-              >>= writeDest (destAMode instr) (size instr)
+opMOV instr =
+    match instr (defaultMatcher `matchSize` mAll `matchSM` mAll `matchDM` mAll) >>
+    readSource (sourceAMode instr) (size instr) >>=
+    doSignExtension instr >>=
+    writeDest (destAMode instr) (size instr)
 
 opMOVFRSR :: Monad m => Instruction -> System m ()
-opMOVFRSR instr = readSR >>= writeDest (destAMode instr) ZLWord
+opMOVFRSR instr =
+    match instr (defaultMatcher `matchDM` mAll) >>
+    readSR >>= writeDest (destAMode instr) ZLWord
 
 opMOVTOSR :: Monad m => Instruction -> System m ()
-opMOVTOSR instr = readSource (sourceAMode instr) ZLWord >>= writeSR
+opMOVTOSR instr =
+    match instr (defaultMatcher `matchSM` mAll) >>
+    readSource (sourceAMode instr) ZLWord >>= writeSR
 
 opMVL :: Monad m => Instruction -> System m ()
-opMVL instr = readSource (sourceAMode instr) (size instr)
-              >>= writeDest (destAMode instr) (size instr)
+opMVL instr =
+    match instr (defaultMatcher `matchSize` mAll `matchSM` mAll `matchDM` mAll) >>
+    readSource (sourceAMode instr) (size instr) >>=
+    writeDest (destAMode instr) (size instr)
 
--- FIXME: must not exchange with dst = memory location
 opEXG :: Monad m => Instruction -> System m ()
 opEXG instr = do
-    mem <- readSource (sourceAMode instr) (size instr)
-    reg <- readSource (destAMode instr) (size instr)
-    writeDest (sourceAMode instr) (size instr) reg
-    writeDest (destAMode instr) (size instr) (extendSign (size instr) mem)
+    -- NOTE: SM decoding gets done by writeDest below
+    (_, _, size, _, reg) <- match instr (defaultMatcher `matchSize` mAll
+                                         `matchDM` mRegister)
+    mem <- readSource (sourceAMode instr) size
+    regValue <- readRegister reg
+    writeDest (sourceAMode instr) size regValue
+    writeRegister reg $ extendSign size mem
 
 

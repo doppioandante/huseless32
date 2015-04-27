@@ -5,6 +5,7 @@ import Control.Monad.Except
 
 import Common
 import Instruction
+import InstructionSet.Validation
 import System
 
 controlInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
@@ -17,11 +18,12 @@ controlInstructionTable = [
     ]
 
 opHALT :: Monad m => Instruction -> System m ()
-opHALT _ = throwError HaltExecution
+opHALT instr = match instr defaultMatcher >> throwError HaltExecution
 
 opNOP :: Monad m => Instruction -> System m ()
-opNOP _ = return ()
+opNOP instr = match instr defaultMatcher >> return ()
 
+-- What the hell is this supposed to do
 opRESET :: Monad m => Instruction -> System m ()
 opRESET _ = undefined
 
@@ -29,4 +31,4 @@ opTRAP :: Monad m => Instruction -> System m ()
 opTRAP _ = undefined
 
 opTRACE :: Monad m => Instruction -> System m ()
-opTRACE _ = throwError Trace
+opTRACE instr = match instr defaultMatcher >> throwError Trace

@@ -4,6 +4,7 @@ import Control.Monad.State
 
 import Common
 import Instruction
+import InstructionSet.Validation
 import System
 import System.PD32
 import System.StatusRegister
@@ -13,14 +14,20 @@ arithmeticInstructionTable = [
     (0, opADD)
     ]
 
+arithMatcher = defaultMatcher `matchSize` mAll `matchSM` mAll `matchDM` mRegister
+
 opADD :: Monad m => Instruction -> System m ()
 opADD instr = do
-    s <- readSource (sourceAMode instr) (size instr)
-    r <- readSource (destAMode instr) (ZLWord)
-    res <- aluCompute (+) s r
-    writeDest (destAMode instr) (ZLWord) res
+    (_, _, size, sourceAMode, reg) <- match instr arithMatcher
+    s <- readSource sourceAMode size
+    r <- readRegister reg
+    res <- aluCompute (+) (extendSign size s) (extendSign size r)
+    writeRegister reg (mask size res)
 
-opADC :: Monad m => Instruction -> System m ()
-opADC instr = undefined --do
---    PD32 { statusRegister = (StatusRegister c _ _ _ _ _) } <- get
-    
+--opADD :: Monad m => Instruction -> System m ()
+--opADD instr = do
+--    (_, _, size, sourceAMode, reg) <- match instr arithMatcher
+--    s <- readSource sourceAMode size
+--    r <- readRegister reg
+--    res <- aluCompute (+) (extendSign size s) (extendSign size r)
+--    writeRegister reg (mask size res)
