@@ -11,7 +11,6 @@ import Data.Word (Word8, Word32)
 import Data.Binary (encode)
 import Data.Binary.Get (runGet)
 import Data.Binary.Bits.Get (runBitGet, block, word8)
-import Data.Bits ((.&.))
 
 import Common
 
@@ -40,8 +39,6 @@ data AddressingMode =
     AMDecrementing Int
     deriving (Eq, Show, Read)
 
-
-data Z = ZByte | ZWord | ZLWord deriving (Eq, Show, Read)
 
 data Instruction = Instruction
     {

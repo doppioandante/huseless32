@@ -1,10 +1,8 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 module System.Memory
 (
 RandomAccessible,
-readWord,
-writeWord,
-checkAddress
+readAligned,
+writeAligned,
 )
 where
 
@@ -14,8 +12,7 @@ import Common
 
 -- a: Memory type
 -- b: Address type
-class RandomAccessible a b where
-    readWord :: a -> b -> LWord
-    writeWord :: a -> b -> LWord -> a
-    checkAddress :: a -> Address -> Maybe b
+class RandomAccessible a where
+    readAligned :: a -> Z -> Address -> Maybe LWord
+    writeAligned :: a -> Z -> Address -> LWord -> Maybe a
 

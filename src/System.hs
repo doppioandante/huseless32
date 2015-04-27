@@ -2,7 +2,7 @@ module System
 where
 
 import Control.Applicative ((<$>))
-import Data.Bits ((.&.), zeroBits, bit, setBit, testBit)
+import Data.Bits (zeroBits, bit, setBit, testBit)
 import Control.Monad (sequence_)
 import Control.Monad.Except
 import Control.Monad.State.Lazy
@@ -36,24 +36,24 @@ writeRegister idx value = do
             take idx rs ++ [value] ++ drop (idx + 1) rs
 
 
-readMemory :: Monad m => Address -> System m LWord
-readMemory addr = do
+readMemory :: Monad m => Z -> Address -> System m LWord
+readMemory z addr = do
     pd32 <- get
     let mem = memory pd32
 
-    case checkAddress mem addr of
+    case readAligned mem z addr  of
       Nothing -> throwError InvalidMemoryAddress
-      Just idx -> return $ readWord mem (idx::LegalAddress)
+      Just value -> return value
 
-writeMemory :: Monad m => Address -> LWord -> System m ()
-writeMemory addr value = do
+writeMemory :: Monad m => Z -> Address -> LWord -> System m ()
+writeMemory z addr value = do
     pd32 <- get
     let mem = memory pd32
 
-    case checkAddress mem addr of
+    case writeAligned mem z addr value of
       Nothing -> throwError InvalidMemoryAddress
-      Just idx -> put pd32 {
-          memory = writeWord mem (idx::LegalAddress) value
+      Just newMemory -> put pd32 {
+          memory = newMemory
           }
 
 readAtPCAndIncrement :: Monad m => System m LWord
@@ -61,22 +61,10 @@ readAtPCAndIncrement = do
     pd32 <- get
     let oldPc = pc pd32
     put pd32 { pc = oldPc + 4 }
-    readMemory oldPc
+    readMemory ZLWord oldPc
 
 getExtensionLWord :: Monad m => System m LWord
 getExtensionLWord = readAtPCAndIncrement
-
-mask :: Z -> LWord -> LWord
-mask z = case z of
-              ZByte -> (.&. 0x000000FF)
-              ZWord -> (.&. 0x0000FFFF) -- holy shit endianness
-              ZLWord -> id
-
-byteSize :: Z -> LWord
-byteSize z = case z of
-               ZByte -> 1
-               ZWord -> 2
-               ZLWord -> 4
 
 extendSign :: Z -> LWord -> LWord
 extendSign ZByte  = fromIntegral . (fromIntegral :: LWord -> Int8)
@@ -105,27 +93,27 @@ readSource addrMode z = do
             return value
         AMAbsolute -> do
             address <- getExtensionLWord
-            readMemory address
+            readMemory z address
         AMIndirectRegister reg ->
             readRegister reg >>=
-            readMemory
+            readMemory z
         AMRegisterOffset reg -> do
             offset <- getExtensionLWord
             base <- readRegister reg
-            readMemory $ base + (byteSize z) * offset
+            readMemory z $ base + (byteSize z) * offset
         AMRelativeOffset -> do
             let oldPc = pc pd32
             offset <- getExtensionLWord
-            readMemory $ oldPc + (byteSize ZLWord) * offset
+            readMemory z $ oldPc + (byteSize ZLWord) * offset
         AMIncrementing reg -> do
             address <- readRegister reg
-            writeRegister reg (address + byteSize z)
-            readMemory address
+            writeRegister reg $ address + byteSize z
+            readMemory z address
         AMDecrementing reg -> do
             regValue <- readRegister reg
             let address = regValue - byteSize z
             writeRegister reg address
-            readMemory address
+            readMemory z address
 
     return $ mask z result
 
@@ -139,27 +127,27 @@ writeDest addrMode z unmaskedValue = do
         AMImmediate -> error "writing to an immediate value"
         AMAbsolute -> do
             address <- getExtensionLWord
-            writeMemory address value
+            writeMemory z address value
         AMIndirectRegister reg -> do
             address <- readRegister reg
-            writeMemory address value
+            writeMemory z address value
         AMRegisterOffset reg -> do
             offset <- getExtensionLWord
             base <- readRegister reg
-            writeMemory (base + (byteSize z) * offset) value
+            writeMemory z (base + (byteSize z) * offset) value
         AMRelativeOffset -> do
             let oldPc = pc pd32
             offset <- getExtensionLWord
-            writeMemory (oldPc + (byteSize ZLWord) * offset) value
+            writeMemory z (oldPc + (byteSize ZLWord) * offset) value
         AMIncrementing reg -> do
             address <- readRegister reg
             writeRegister reg (address + byteSize z)
-            writeMemory address value
+            writeMemory z address value
         AMDecrementing reg -> do
             regValue <- readRegister reg
             let address = regValue - (byteSize z)
             writeRegister reg address
-            writeMemory address value
+            writeMemory z address value
 
 modifySR :: Monad m => (StatusRegister -> StatusRegister) -> System m ()
 modifySR modify = do
@@ -203,4 +191,5 @@ aluCompute op value1 value2 =
         setZero z
         setOverflow o
         setParity p
+
         return result
