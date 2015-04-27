@@ -6,6 +6,7 @@ import Control.Monad.Except
 import Common
 import Instruction
 import InstructionSet.Control
+import InstructionSet.Validation
 import System
 
 dataInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
