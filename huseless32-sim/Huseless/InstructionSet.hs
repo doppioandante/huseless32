@@ -1,12 +1,12 @@
 module InstructionSet
 where
 
-import Common
-import Instruction
+import Huseless.Common
+import Huseless.Instruction
 
-import InstructionSet.Arithmetic
-import InstructionSet.Control
-import InstructionSet.Data
+import Huseless.InstructionSet.Arithmetic
+import Huseless.InstructionSet.Control
+import Huseless.InstructionSet.Data
 
 import System
 

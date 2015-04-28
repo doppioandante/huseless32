@@ -1,4 +1,4 @@
-module System.StatusRegister where
+module Huseless.System.StatusRegister where
 
 data StatusRegister = StatusRegister
     {

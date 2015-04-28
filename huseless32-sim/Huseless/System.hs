@@ -1,4 +1,4 @@
-module System
+module Huseless.System
 where
 
 import Control.Applicative ((<$>))
@@ -8,12 +8,12 @@ import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Data.Int (Int8, Int16, Int32)
 
-import Common
-import Instruction
-import System.Memory.VectorMemory
-import System.PD32
-import System.ALUOps
-import System.StatusRegister
+import Huseless.Common
+import Huseless.Instruction
+import Huseless.System.Memory.VectorMemory
+import Huseless.System.PD32
+import Huseless.System.ALUOps
+import Huseless.System.StatusRegister
 
 data Failure = Trace | HaltExecution | InvalidMemoryAddress | InvalidOpCode
   deriving (Eq, Show)

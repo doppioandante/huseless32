@@ -1,10 +1,10 @@
-module System.PD32 where
+module Huseless.System.PD32 where
 
 
-import Common
-import System.Device
-import System.Memory.VectorMemory
-import System.StatusRegister
+import Huseless.Common
+import Huseless.System.Device
+import Huseless.System.Memory.VectorMemory
+import Huseless.System.StatusRegister
 
 type SysMemory = VectorMemory
 type LegalAddress = Int

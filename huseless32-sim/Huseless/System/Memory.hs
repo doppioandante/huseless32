@@ -1,4 +1,4 @@
-module System.Memory
+module Huseless.System.Memory
 (
 RandomAccessible,
 readAligned,
@@ -8,7 +8,7 @@ where
 
 import Data.Maybe
 
-import Common
+import Huseless.Common
 
 -- a: Memory type
 -- b: Address type

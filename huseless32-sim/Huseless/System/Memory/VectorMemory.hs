@@ -1,4 +1,4 @@
-module System.Memory.VectorMemory
+module Huseless.System.Memory.VectorMemory
 (
 VectorMemory,
 readAligned,
@@ -12,8 +12,8 @@ import qualified Data.ByteString.Lazy as BS (take, drop, append)
 import Data.Int (Int64)
 import qualified Data.Vector as V
 
-import Common
-import System.Memory
+import Huseless.Common
+import Huseless.System.Memory
 
 newtype VectorMemory = VectorMemory (V.Vector LWord) deriving (Eq, Show)
 

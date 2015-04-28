@@ -1,4 +1,4 @@
-module Instruction
+module Huseless.Instruction
 (
 Instruction(..),
 Z(..),
@@ -12,7 +12,7 @@ import Data.Binary (encode)
 import Data.Binary.Get (runGet)
 import Data.Binary.Bits.Get (runBitGet, block, word8)
 
-import Common
+import Huseless.Common
 
 data RawInstruction = RawInstruction
     {

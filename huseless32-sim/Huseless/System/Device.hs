@@ -1,4 +1,4 @@
-module System.Device
+module Huseless.System.Device
 where
 
 data Device = Device deriving (Eq, Show)

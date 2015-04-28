@@ -1,13 +1,13 @@
-module InstructionSet.Data
+module Huseless.InstructionSet.Data
 where
 
 import Control.Monad.Except
 
-import Common
-import Instruction
-import InstructionSet.Control
-import InstructionSet.Validation
-import System
+import Huseless.Common
+import Huseless.Instruction
+import Huseless.InstructionSet.Control
+import Huseless.InstructionSet.Validation
+import Huseless.System
 
 dataInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
 dataInstructionTable = [

@@ -1,9 +1,9 @@
-module System.ALUOps where
+module Huseless.System.ALUOps where
 
 import Data.Bits (testBit, finiteBitSize, xor)
 
-import Common
-import System.StatusRegister
+import Huseless.Common
+import Huseless.System.StatusRegister
 
 
 lwordBits :: Int

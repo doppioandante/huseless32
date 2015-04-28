@@ -1,13 +1,13 @@
-module InstructionSet.Arithmetic where
+module Huseless.InstructionSet.Arithmetic where
 
 import Control.Monad.State
 
-import Common
-import Instruction
-import InstructionSet.Validation
-import System
-import System.PD32
-import System.StatusRegister
+import Huseless.Common
+import Huseless.Instruction
+import Huseless.InstructionSet.Validation
+import Huseless.System
+import Huseless.System.PD32
+import Huseless.System.StatusRegister
 
 arithmeticInstructionTable :: Monad m => [(Int, Instruction -> System m())]
 arithmeticInstructionTable = [

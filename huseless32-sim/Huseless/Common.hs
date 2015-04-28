@@ -1,4 +1,4 @@
-module Common
+module Huseless.Common
 (
 Word8,
 LWord,
