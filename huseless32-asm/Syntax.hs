@@ -2,7 +2,7 @@ module Syntax where
 
 data AsmLine = Instruction Label InstructionBody
              | PseudoInstruction Label PseudoInstructionBody
-             | Assignment Variable Expression
+             | Assignment String Expression
              deriving (Eq, Show)
 
 data Label = Label String
@@ -18,10 +18,15 @@ data PseudoInstructionBody = Declare Size Expression
                            | Initialize Size InitList
     deriving (Eq, Show)
 
-data Variable = Variable String deriving (Eq, Show)
+data Expression = ExprValue Integer
+                | Variable String
+                | BinaryOp OpType Expression Expression
+                deriving (Eq, Show)
 
--- TODO
-data Expression = Expression Int deriving (Eq, Show)
+data OpType = Plus
+            | Minus
+            | Multiply
+            deriving (Eq, Show)
 
 data Operand = Direct    Register
              | Immediate Expression
@@ -44,3 +49,4 @@ data InitValue = InitASCII String
                deriving (Eq, Show)
 
 data Register = Register Int deriving (Eq, Show)
+

@@ -12,10 +12,11 @@ import qualified Text.Parsec.Token as Tok
 lexer :: Tok.TokenParser ()
 lexer = Tok.makeTokenParser style
     where
-        ops = ["+", "-", "*"]
         --names = [],
         style = emptyDef {
-            Tok.commentLine = ";"
+            Tok.commentLine = ";",
+            Tok.reservedOpNames = ["+", "-", "*"],
+            Tok.opLetter = oneOf "+-*"
             }
 
 -- RIPOFF, thanks Parsec.Token <3
@@ -42,3 +43,8 @@ integer = Tok.lexeme lexer (
     ($) <$> option id read_sign <*> unsigned_literal <?> "integer"
     )
 
+parens = Tok.parens lexer
+
+identifier = Tok.identifier lexer
+
+reservedOp = Tok.reservedOp lexer
