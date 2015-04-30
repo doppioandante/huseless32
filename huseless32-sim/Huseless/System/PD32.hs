@@ -8,7 +8,7 @@ import Huseless.System.StatusRegister
 
 type LegalAddress = Int
 
-data  AnyMem = forall mem . RandomAccessible mem => AnyMem { getMemory :: mem }
+data  AnyMem = forall mem . RandomAccessible mem => AnyMem mem
 
 instance RandomAccessible AnyMem where
     readAligned (AnyMem m) z address = readAligned m z address
