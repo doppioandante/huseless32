@@ -9,14 +9,108 @@ import Text.Parsec.Language (emptyDef)
 
 import qualified Text.Parsec.Token as Tok
 
+
+mnemonic0Names = [
+    "HALT",
+    "NOP",
+    "RESET",
+    "TRACE",
+    "PUSHSR",
+    "POPSR",
+    "CLCR",
+    "CLRN",
+    "CLRZ",
+    "CLRV",
+    "CLRP",
+    "CLRI",
+    "SETC",
+    "SETN",
+    "SETZ",
+    "SETV",
+    "SETP",
+    "SETI",
+    "RET",
+    "RTI"
+    --, "ILLEGAL"
+    ]
+
+mnemonic1Names = [
+    "TRAP",
+    "PUSH",
+    "POP",
+    "MOVFRSR",
+    "MOVTOSR",
+    "JMP",
+    "JSR",
+    "JC",
+    "JN",
+    "JZ",
+    "JV",
+    "JP",
+    "JI",
+    "JNC",
+    "JNN",
+    "JNZ",
+    "JNV",
+    "JNP",
+    "JNI",
+    "START",
+    "CLEAR",
+    "SETIM",
+    "CLRIM"
+    ]
+
+mnemonic2Names = [
+    "SMUL",
+    "UMUL",
+    "SDIV",
+    "UDIV",
+    "DSMUL",
+    "DUMUL",
+    "DSDIV",
+    "DUDIV",
+    "JR",
+    "JNR",
+    "JIM",
+    "JNIM"
+    ]
+    ++ (sm "MOV")
+    ++ (sm "MVL")
+    ++ (sm "EXG")
+    ++ (sm "ADD")
+    ++ (sm "ADC")
+    ++ (sm "CMP")
+    ++ (sm "NEG")
+    ++ (sm "SUB")
+    ++ (sm "SBB")
+    ++ (sm "AND")
+    ++ (sm "OR")
+    ++ (sm "XOR")
+    ++ (sm "NOT")
+    ++ (sm "ASL")
+    ++ (sm "ASR")
+    ++ (sm "LSL")
+    ++ (sm "LSR")
+    ++ (sm "RCL")
+    ++ (sm "RCR")
+    ++ (sm "ROL")
+    ++ (sm "ROR")
+    ++ (sm "IN")
+    ++ (sm "OUT")
+ where
+     sm name = [name ++ z | z <- ["B", "W", "L"]]
+
+registerNames = ['R':[idx] | idx <- ['0' .. '7']]
+
 lexer :: Tok.TokenParser ()
 lexer = Tok.makeTokenParser style
     where
-        --names = [],
+        mnemonicNames = mnemonic0Names ++ mnemonic1Names ++ mnemonic2Names
         style = emptyDef {
             Tok.commentLine = ";",
-            Tok.reservedOpNames = ["+", "-", "*"],
-            Tok.opLetter = oneOf "+-*"
+            Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC"],
+            Tok.reservedOpNames = ["+", "-", "*", "=", ":"],
+            Tok.opLetter = oneOf "+-*()"
             }
 
 -- RIPOFF, thanks Parsec.Token <3
@@ -48,3 +142,9 @@ parens = Tok.parens lexer
 identifier = Tok.identifier lexer
 
 reservedOp = Tok.reservedOp lexer
+
+reserved = Tok.reserved lexer
+
+whiteSpace = Tok.whiteSpace lexer
+
+symbol s = Tok.symbol lexer s

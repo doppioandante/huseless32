@@ -27,6 +27,7 @@ opNOP instr = match instr defaultMatcher >> return ()
 opRESET :: Monad m => Instruction -> System m ()
 opRESET _ = undefined
 
+-- REMEMBER: needs parameter
 opTRAP :: Monad m => Instruction -> System m ()
 opTRAP _ = undefined
 

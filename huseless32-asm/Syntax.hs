@@ -1,6 +1,6 @@
 module Syntax where
 
-data AsmLine = Instruction Label InstructionBody
+data AsmStmt = Instruction Label InstructionBody
              | PseudoInstruction Label PseudoInstructionBody
              | Assignment String Expression
              deriving (Eq, Show)
@@ -36,7 +36,7 @@ data Operand = Direct    Register
              | RelativeOffset Expression
              | Decrementing   Register
              | Incrementing   Register
-             | Device Expression
+             | Device
              deriving (Eq, Show)
 
 data Size = SizeByte | SizeWord | SizeLWord deriving (Eq, Show)
