@@ -1,4 +1,4 @@
-module InstructionSet
+module Huseless.InstructionSet
 where
 
 import Huseless.Common
@@ -8,7 +8,7 @@ import Huseless.InstructionSet.Arithmetic
 import Huseless.InstructionSet.Control
 import Huseless.InstructionSet.Data
 
-import System
+import Huseless.System
 
 getAction :: Monad m => Int -> Int -> Maybe (Instruction -> System m ())
 getAction instrClass instrCode = do

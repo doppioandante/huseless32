@@ -1,11 +1,11 @@
-module InstructionSet.Validation where
+module Huseless.InstructionSet.Validation where
 
 import Data.Maybe
 import Data.Word (Word8)
 import Control.Monad.Except (throwError)
 
-import Instruction
-import System
+import Huseless.Instruction
+import Huseless.System
 
 data Matcher a b c d = Matcher
     {
