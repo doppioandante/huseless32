@@ -1,4 +1,4 @@
-module Lexer where
+module Huseless.Lexer where
 
 import Data.Char (digitToInt)
 import Data.List (foldl')

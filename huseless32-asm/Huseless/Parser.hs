@@ -1,11 +1,11 @@
-module Parser where
+module Huseless.Parser where
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Expr as Expr
 
-import Lexer
-import Syntax
+import Huseless.Lexer
+import Huseless.Syntax
 
 binary s f = Expr.Infix (reservedOp s >> return (BinaryOp f)) Expr.AssocLeft
 

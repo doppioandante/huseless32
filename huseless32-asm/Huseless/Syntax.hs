@@ -1,4 +1,4 @@
-module Syntax where
+module Huseless.Syntax where
 
 data AsmStmt = Instruction Label InstructionBody
              | PseudoInstruction Label PseudoInstructionBody
