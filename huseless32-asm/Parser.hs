@@ -71,7 +71,7 @@ operand =  try direct
        <|> try relativeOffset
        <|> try decrementing
        <|> try incrementing
-       <|> try device
+       -- <|> try device
 
 register_literal = findReserved registerNames
 
@@ -109,7 +109,7 @@ incrementing :: Parser Operand
 incrementing = Incrementing <$> parens register <* reservedOp "+"
 
 device :: Parser Operand
-device = unexpected "Hit device matching"
+device = undefined
 
 instructionBody :: Parser InstructionBody
 instructionBody = try mnemonic0 <|> try mnemonic1 <|> try mnemonic2
