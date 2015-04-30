@@ -1,13 +1,20 @@
+{-# LANGUAGE ExistentialQuantification #-}
 module Huseless.System.PD32 where
-
 
 import Huseless.Common
 import Huseless.System.Device
-import Huseless.System.Memory.VectorMemory
+import Huseless.System.Memory
 import Huseless.System.StatusRegister
 
-type SysMemory = VectorMemory
 type LegalAddress = Int
+
+data  AnyMem = forall mem . RandomAccessible mem => AnyMem { getMemory :: mem }
+
+instance RandomAccessible AnyMem where
+    readAligned (AnyMem m) z address = readAligned m z address
+
+    writeAligned (AnyMem m) z address value =
+        AnyMem <$> writeAligned m z address value
 
 data PD32 = PD32
     {
@@ -15,10 +22,9 @@ data PD32 = PD32
 
         cpuRegisters :: [LWord],
         statusRegister :: StatusRegister,
-        memory :: SysMemory,
+        memory :: AnyMem,
         devices :: [Device]
     }
-    deriving (Eq, Show)
 
 
 

@@ -10,7 +10,7 @@ import Data.Int (Int8, Int16, Int32)
 
 import Huseless.Common
 import Huseless.Instruction
-import Huseless.System.Memory.VectorMemory
+import Huseless.System.Memory
 import Huseless.System.PD32
 import Huseless.System.ALUOps
 import Huseless.System.StatusRegister
