@@ -30,7 +30,7 @@ assignment = Assignment <$> identifier <* reservedOp "=" <*> expression
 
 asmLabel :: Parser Label
 asmLabel = option EmptyLabel (
-               Label <$> identifier <* reservedOp ":"
+               Label <$> identifier <* colon
            )
 
  -- TODO: is this efficient? Maybe lazyness is saving us
@@ -56,7 +56,7 @@ mnemonic2 :: Parser InstructionBody
 mnemonic2 = do
     name <- findReserved mnemonic2Names
     op1 <- operand
-    symbol ","
+    comma
     op2 <- operand
     -- TODO: check validity early
     return $ Mnemonic2 name op1 op2
@@ -86,7 +86,7 @@ immediate :: Parser Operand
 immediate = Immediate <$ char '#' <*> expression
 
 absolute :: Parser Operand
-absolute = Absolute <$> expression <* notFollowedBy (symbol "(")
+absolute = Absolute <$> expression <* notFollowedBy comma
 
 indirect :: Parser Operand
 indirect = Indirect <$> parens register <* notFollowedBy (reservedOp "+")
@@ -118,14 +118,55 @@ instruction = Instruction <$> asmLabel <*> instructionBody
 
 globalDecl :: Parser AsmStmt
 globalDecl = GlobalDecl <$ char '.' <* reserved "GLB"
-                        <*> sepBy1 identifier (symbol ",")
+                        <*> commaSep1 identifier
 
 externDecl :: Parser AsmStmt
 externDecl = ExternDecl <$ char '.' <* reserved "EXT"
-                        <*> sepBy1 identifier (symbol ",")
+                        <*> commaSep1 identifier
+
+pseudoDeclareStmt :: Parser PseudoInstructionBody
+pseudoDeclareStmt = do
+    char '.'
+    (_:_:z) <- findReserved ["DSB", "DSW", "DSL"]
+    let size = case z of
+                   "B" -> SizeByte
+                   "W" -> SizeWord
+                   "L" -> SizeLWord
+                   _   -> error $ "Invalid size matched: " ++ z
+    expr <- expression
+    return $ Declare size expr
+
+initValue :: Parser InitValue
+initValue =  (InitASCII <$> stringLiteral)
+         <|> (InitExpr <$> expression)
+
+initList :: Parser InitList
+initList = InitList <$> commaSep1 initValue
+
+pseudoInitStmt :: Parser PseudoInstructionBody
+pseudoInitStmt = do
+    char '.'
+    (_:_:z) <- findReserved ["DCB", "DCW", "DCL"]
+    let size = case z of
+                   "B" -> SizeByte
+                   "W" -> SizeWord
+                   "L" -> SizeLWord
+                   _   -> error $ "Invalid size matched: " ++ z
+    list <- initList
+    return $ Initialize size list
+
+pseudoInstructionBody :: Parser PseudoInstructionBody
+pseudoInstructionBody =  try pseudoDeclareStmt
+                     <|> try pseudoInitStmt
+
+pseudoInstruction = PseudoInstruction <$> asmLabel <*> pseudoInstructionBody
 
 asmStmt :: Parser AsmStmt
-asmStmt = instruction <|> assignment <|> globalDecl <|> externDecl
+asmStmt = instruction
+       <|> assignment
+       <|> pseudoInstruction
+       <|> try globalDecl
+       <|> try externDecl
 
 stmtList :: Parser [AsmStmt]
 stmtList = manyTill asmStmt eof

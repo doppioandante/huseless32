@@ -43,7 +43,7 @@ data Operand = Direct    Register
 
 data Size = SizeByte | SizeWord | SizeLWord deriving (Eq, Show)
 
-data InitList = InitList InitValue [InitValue]
+data InitList = InitList [InitValue]
               deriving (Eq, Show)
 
 data InitValue = InitASCII String

@@ -110,8 +110,8 @@ lexer = Tok.makeTokenParser style
         style = emptyDef {
             Tok.commentLine = ";",
             Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC", "GLB", "EXT"],
-            Tok.reservedOpNames = ["+", "-", "*", "=", ":"],
-            Tok.opLetter = oneOf "+-*()"
+            Tok.reservedOpNames = ["+", "-", "*", "="],
+            Tok.opLetter = oneOf "+-*"
             }
 
 -- RIPOFF, thanks Parsec.Token <3
@@ -138,13 +138,11 @@ integer = Tok.lexeme lexer (
     )
 
 parens = Tok.parens lexer
-
 identifier = Tok.identifier lexer
-
 reservedOp = Tok.reservedOp lexer
-
 reserved = Tok.reserved lexer
-
 whiteSpace = Tok.whiteSpace lexer
-
-symbol s = Tok.symbol lexer s
+colon = Tok.colon lexer
+comma = Tok.comma lexer
+commaSep1 = Tok.commaSep1 lexer
+stringLiteral = Tok.stringLiteral lexer
