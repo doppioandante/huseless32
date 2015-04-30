@@ -2,7 +2,6 @@ module Parser where
 
 import Text.Parsec
 import Text.Parsec.String (Parser)
-
 import qualified Text.Parsec.Expr as Expr
 
 import Lexer
@@ -90,7 +89,7 @@ absolute :: Parser Operand
 absolute = Absolute <$> expression <* notFollowedBy (symbol "(")
 
 indirect :: Parser Operand
-indirect = Indirect <$> parens register <* notFollowedBy (symbol "+")
+indirect = Indirect <$> parens register <* notFollowedBy (reservedOp "+")
 
 -- NOTE: indirectOffset doesn't accept full blown expression
 indirectOffset :: Parser Operand
@@ -117,8 +116,16 @@ instructionBody = try mnemonic0 <|> try mnemonic1 <|> try mnemonic2
 instruction :: Parser AsmStmt
 instruction = Instruction <$> asmLabel <*> instructionBody
 
+globalDecl :: Parser AsmStmt
+globalDecl = GlobalDecl <$ char '.' <* reserved "GLB"
+                        <*> sepBy1 identifier (symbol ",")
+
+externDecl :: Parser AsmStmt
+externDecl = ExternDecl <$ char '.' <* reserved "EXT"
+                        <*> sepBy1 identifier (symbol ",")
+
 asmStmt :: Parser AsmStmt
-asmStmt = instruction <|> assignment
+asmStmt = instruction <|> assignment <|> globalDecl <|> externDecl
 
 stmtList :: Parser [AsmStmt]
 stmtList = manyTill asmStmt eof

@@ -1,6 +1,7 @@
 module Lexer where
 
 import Data.Char (digitToInt)
+import Data.List (foldl')
 import Text.Parsec
 import Text.Parsec.Combinator
 import Text.Parsec.Char
@@ -108,17 +109,16 @@ lexer = Tok.makeTokenParser style
         mnemonicNames = mnemonic0Names ++ mnemonic1Names ++ mnemonic2Names
         style = emptyDef {
             Tok.commentLine = ";",
-            Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC"],
+            Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC", "GLB", "EXT"],
             Tok.reservedOpNames = ["+", "-", "*", "=", ":"],
             Tok.opLetter = oneOf "+-*()"
             }
 
 -- RIPOFF, thanks Parsec.Token <3
-bnumber base baseDigit
-        = do{ digits <- many1 baseDigit
-            ; let n = foldl (\x d -> base*x + toInteger (digitToInt d)) 0 digits
-            ; seq n (return n)
-            }
+bnumber base baseDigit = do
+    digits <- many1 baseDigit
+    let n = foldl' (\x d -> base*x + toInteger (digitToInt d)) 0 digits
+    return n
 
 hex_literal = char '$' *> bnumber 16 hexDigit
 dec_literal = bnumber 10 digit

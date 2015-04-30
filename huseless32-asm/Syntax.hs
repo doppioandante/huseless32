@@ -3,6 +3,8 @@ module Syntax where
 data AsmStmt = Instruction Label InstructionBody
              | PseudoInstruction Label PseudoInstructionBody
              | Assignment String Expression
+             | GlobalDecl [String]
+             | ExternDecl [String]
              deriving (Eq, Show)
 
 data Label = Label String
