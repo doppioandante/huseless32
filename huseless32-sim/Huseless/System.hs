@@ -63,6 +63,11 @@ readAtPCAndIncrement = do
     put pd32 { pc = oldPc + 4 }
     readMemory ZLWord oldPc
 
+writePC :: Monad m => LWord -> System m ()
+writePC value = do
+    pd32 <- get
+    put pd32 { pc = value }
+
 getExtensionLWord :: Monad m => System m LWord
 getExtensionLWord = readAtPCAndIncrement
 
@@ -71,16 +76,16 @@ extendSign ZByte  = fromIntegral . (fromIntegral :: LWord -> Int8)
 extendSign ZWord  = fromIntegral . (fromIntegral :: LWord -> Int16)
 extendSign ZLWord = fromIntegral . (fromIntegral :: LWord -> Int32) -- identity
 
-needsSignExtension :: Instruction -> Bool
-needsSignExtension instr =
-    case destAMode instr of
-      AMRegister _ -> True
-      _ -> False
-
-doSignExtension :: Monad m => Instruction -> LWord -> System m LWord
-doSignExtension instr = return . if needsSignExtension instr
-                                    then extendSign (size instr)
-                                    else id
+--needsSignExtension :: Instruction -> Bool
+--needsSignExtension instr =
+--    case destAMode instr of
+--      AMRegister _ -> True
+--      _ -> False
+--
+--doSignExtension :: Monad m => Instruction -> LWord -> System m LWord
+--doSignExtension instr = return . if needsSignExtension instr
+--                                    then extendSign (size instr)
+--                                    else id
 
 readSource :: Monad m => AddressingMode -> Z -> System m LWord
 readSource addrMode z = do

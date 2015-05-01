@@ -77,8 +77,8 @@ matchDM (Matcher mExt1' mExt2' mSize' mSM' _) f =
 
 mExact :: Eq a => a -> a -> Maybe a
 mExact expected value = if expected == value
-                               then Just value
-                               else Nothing
+                             then Just value
+                             else Nothing
 
 mRegister :: AddressingMode -> Maybe Int
 mRegister mode =

@@ -8,6 +8,8 @@ import Huseless.InstructionSet.ArithLogic
 import Huseless.InstructionSet.CondBits
 import Huseless.InstructionSet.Control
 import Huseless.InstructionSet.Data
+import Huseless.InstructionSet.ExecFlow
+import Huseless.InstructionSet.Shift
 
 import Huseless.System
 
@@ -24,10 +26,9 @@ instructionTables = [
     dataInstructionTable,
     arithmeticInstructionTable,
     logicInstructionTable,
-    undefined,
-    condBitsInstructionTable
+    shiftInstructionTable,
+    condBitsInstructionTable,
+    execFlowInstructionTable,
+    undefined -- inOutInstructionTable
     ]
---    shiftInstructionTable,
---    execFlowInstructionTable,
---    inOutInstructionTable
 

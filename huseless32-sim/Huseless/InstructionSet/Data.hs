@@ -18,6 +18,17 @@ dataInstructionTable = [
     (4, opEXG)
     ]
 
+needsSignExtension :: Instruction -> Bool
+needsSignExtension instr =
+    case destAMode instr of
+      AMRegister _ -> True
+      _ -> False
+
+doSignExtension :: Monad m => Instruction -> LWord -> System m LWord
+doSignExtension instr = return . if needsSignExtension instr
+                                    then extendSign (size instr)
+                                    else id
+
 -- TODO: set status resgister
 opMOV :: Monad m => Instruction -> System m ()
 opMOV instr =
