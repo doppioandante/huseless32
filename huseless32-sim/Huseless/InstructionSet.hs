@@ -5,6 +5,7 @@ import Huseless.Common
 import Huseless.Instruction
 
 import Huseless.InstructionSet.ArithLogic
+import Huseless.InstructionSet.CondBits
 import Huseless.InstructionSet.Control
 import Huseless.InstructionSet.Data
 

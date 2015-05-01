@@ -9,22 +9,20 @@ import Huseless.InstructionSet
 import Huseless.System
 import Huseless.System.PD32
 
-run :: Monad m =>
-       PD32 ->
-       System m ()
-run currentPD32 = do
+runSystem :: Monad m =>
+             PD32 ->
+             m (Failure, PD32)
+runSystem currentPD32 = do
     (result, newPD32) <- (runStateT $ runExceptT fetchDecodeExecute) $
                          currentPD32
     case result of
-      Left HaltExecution -> return ()
-      Right () -> run newPD32
-      Left failure -> throwError failure -- rethrow
+      Right () -> runSystem newPD32
+      Left failure -> return (failure, newPD32)
 
 fetchDecodeExecute :: Monad m => System m ()
 fetchDecodeExecute = do
    encodedInstruction <- readAtPCAndIncrement
    runInstruction (encodedInstruction)
-
 
 runInstruction :: Monad m => LWord -> System m ()
 runInstruction lword =

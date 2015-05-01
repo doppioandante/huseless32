@@ -5,7 +5,7 @@ import Huseless.Instruction
 import Huseless.InstructionSet.Validation
 import Huseless.System
 
-condBitsInstructionTable :: Monad m => [(Int, Instruction -> System m())]
+condBitsInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
 condBitsInstructionTable = [
     (0, opCLRC),
     (1, opCLRN),
@@ -25,49 +25,49 @@ condBitsInstructionTable = [
 condBitsMatcher = defaultMatcher
 
 opCLRC instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setCarry False
 
 opCLRN instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setNegative False
 
 opCLRZ instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setZero False
 
 opCLRV instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setOverflow False
 
 opCLRP instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setParity False
 
 opCLRI instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setInterrupt False
 
 opSETC instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setCarry False
 
 opSETN instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setNegative True
 
 opSETZ instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setZero True
 
 opSETV instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setOverflow True
 
 opSETP instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setParity True
 
 opSETI instr =
-    match instr condBitsMatcher
+    match instr condBitsMatcher >>
     setInterrupt True
