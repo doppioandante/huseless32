@@ -2,6 +2,7 @@ module Huseless.InstructionSet.ArithLogic where
 
 import Control.Monad.Except
 import Control.Monad.State
+import Data.Bits ((.&.), (.|.), xor, complement)
 import Data.Int (Int16, Int32, Int64)
 import Data.Word (Word64)
 
@@ -15,7 +16,28 @@ import Huseless.System.StatusRegister
 
 arithmeticInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
 arithmeticInstructionTable = [
-    (0, opADD)
+    (0, opADD),
+    (1, opADC),
+    (2, opCMP),
+    (3, opNEG),
+    (4, opSUB),
+    (5, opSBB),
+    (6, opSMUL),
+    (7, opUMUL),
+    (8, opSDIV),
+    (9, opUDIV),
+    (10, opDSMUL),
+    (11, opDUMUL),
+    (12, opDSDIV),
+    (13, opDUDIV)
+    ]
+
+logicInstructionTable :: Monad m => [(Int, Instruction -> System m ())]
+logicInstructionTable = [
+    (0, opAND),
+    (1, opOR),
+    (2, opXOR),
+    (3, opNOT)
     ]
 
 sizedMatcher = defaultMatcher `matchSize` mAll `matchSM` mAll `matchDM` mRegister
@@ -169,6 +191,7 @@ opDUMUL instr = do
           in if part == 0
                 then fromIntegral $ (x' * y') `mod` 0x100000000
                 else fromIntegral $ (x' * y') `div` 0x100000000
+
 opDSDIV :: Monad m => Instruction -> System m ()
 opDSDIV instr = do
     (_, _, _, sourceAMode, reg) <- match instr unsizedMatcher
@@ -208,4 +231,31 @@ opDUDIV instr = do
           if part == 0
              then fromIntegral $ (x `div` y)
              else fromIntegral $ (x `mod` y)
+
+
+
+opAND :: Monad m => Instruction -> System m ()
+opAND instr = do
+    (size, reg, s, r) <- aluOpHeader instr
+    res <- aluCompute (.&.) r s
+    writeRegister reg res -- significat word is zero, no need to mask
+
+opOR :: Monad m => Instruction -> System m ()
+opOR instr = do
+    (size, reg, s, r) <- aluOpHeader instr
+    res <- aluCompute (.|.) r s
+    writeRegister reg res -- significat word is zero, no need to mask
+
+opXOR :: Monad m => Instruction -> System m ()
+opXOR instr = do
+    (size, reg, s, r) <- aluOpHeader instr
+    res <- aluCompute (xor) r s
+    writeRegister reg res -- significat word is zero, no need to mask
+
+opNOT :: Monad m => Instruction -> System m ()
+opNOT instr = do
+    (size, reg, s, r) <- aluOpHeader instr
+    -- WARNING: HACK YOLO
+    res <- aluCompute const (complement s) 0
+    writeRegister reg (mask size res)
 

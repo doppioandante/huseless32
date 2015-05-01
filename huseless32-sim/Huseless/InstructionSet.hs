@@ -23,13 +23,11 @@ instructionTables = [
     controlInstructionTable,
     dataInstructionTable,
     arithmeticInstructionTable,
-    undefined,
+    logicInstructionTable,
     undefined,
     condBitsInstructionTable
     ]
---    logicInstructionTable,
 --    shiftInstructionTable,
---    condBitsInstructionTable,
 --    execFlowInstructionTable,
 --    inOutInstructionTable
 
