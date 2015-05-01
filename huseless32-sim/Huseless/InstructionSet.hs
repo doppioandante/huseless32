@@ -4,7 +4,7 @@ where
 import Huseless.Common
 import Huseless.Instruction
 
-import Huseless.InstructionSet.Arithmetic
+import Huseless.InstructionSet.ArithLogic
 import Huseless.InstructionSet.Control
 import Huseless.InstructionSet.Data
 
@@ -21,7 +21,10 @@ instructionTables :: Monad m => [[(Int, (Instruction -> System m ()))]]
 instructionTables = [
     controlInstructionTable,
     dataInstructionTable,
-    arithmeticInstructionTable
+    arithmeticInstructionTable,
+    undefined,
+    undefined,
+    condBitsInstructionTable
     ]
 --    logicInstructionTable,
 --    shiftInstructionTable,
