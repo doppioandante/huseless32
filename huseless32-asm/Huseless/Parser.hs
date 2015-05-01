@@ -86,7 +86,7 @@ immediate :: Parser Operand
 immediate = Immediate <$ char '#' <*> expression
 
 absolute :: Parser Operand
-absolute = Absolute <$> expression <* notFollowedBy comma
+absolute = Absolute <$> expression <* notFollowedBy (symbol "(")
 
 indirect :: Parser Operand
 indirect = Indirect <$> parens register <* notFollowedBy (reservedOp "+")
