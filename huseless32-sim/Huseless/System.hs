@@ -76,16 +76,6 @@ extendSign ZByte  = fromIntegral . (fromIntegral :: LWord -> Int8)
 extendSign ZWord  = fromIntegral . (fromIntegral :: LWord -> Int16)
 extendSign ZLWord = fromIntegral . (fromIntegral :: LWord -> Int32) -- identity
 
---needsSignExtension :: Instruction -> Bool
---needsSignExtension instr =
---    case destAMode instr of
---      AMRegister _ -> True
---      _ -> False
---
---doSignExtension :: Monad m => Instruction -> LWord -> System m LWord
---doSignExtension instr = return . if needsSignExtension instr
---                                    then extendSign (size instr)
---                                    else id
 
 readSource :: Monad m => AddressingMode -> Z -> System m LWord
 readSource addrMode z = do

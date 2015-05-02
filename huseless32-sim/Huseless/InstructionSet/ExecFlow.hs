@@ -40,19 +40,37 @@ opJMP instr = do
 
 opJSR :: Monad m => Instruction -> System m ()
 opJSR instr = do
-    -- push pc
+    -- PUSH PC = MOVL PC, -(R7)
+    pd32 <- get
+    stackPointer <- readRegister 7
+    let newSP = stackPointer - 4 -- decrement stackPointer
+    writeRegister 7 newSP
+    writeMemory ZLWord newSP $ pc pd32
+
     opJMP instr
 
 opRET :: Monad m => Instruction -> System m ()
 opRET instr = do
-    -- pop pc
-    return ()
+    -- POP PC = MOVL (R7)+, PC
+    pd32 <- get
+    stackPointer <- readRegister 7
+    newPc <- readMemory ZLWord stackPointer
+    writeRegister 7 (stackPointer+4)
+
+    writePC newPc
 
 opRTI :: Monad m => Instruction -> System m ()
 opRTI instr = do
-    -- pop pc
-    -- pop sr
-    return ()
+    -- POP PC
+    pd32 <- get
+    stackPointer <- readRegister 7
+    newPc <- readMemory ZLWord stackPointer
+
+    writePC newPc
+
+    -- POP SR
+    readMemory ZLWord (stackPointer+4) >>= writeSR
+    writeRegister 7 (stackPointer+8)
 
 opConditionalJump :: Monad m => (StatusRegister -> Bool) -> Bool ->
                      Instruction -> System m ()
