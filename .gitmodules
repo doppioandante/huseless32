@@ -1,0 +1,3 @@
+[submodule "huseless32-asm/parsec"]
+	path = huseless32-asm/parsec
+	url = https://github.com/doppioandante/parsec
