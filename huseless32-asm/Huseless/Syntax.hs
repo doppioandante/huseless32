@@ -1,14 +1,13 @@
 module Huseless.Syntax where
 
-data AsmStmt = Instruction Label InstructionBody
-             | PseudoInstruction Label PseudoInstructionBody
+data AsmStmt = Instruction LabelList InstructionBody
+             | PseudoInstruction LabelList PseudoInstructionBody
              | Assignment String Expression
              | GlobalDecl [String]
              | ExternDecl [String]
              deriving (Eq, Show)
 
-data Label = Label String
-           | EmptyLabel
+data LabelList = LabelList [String]
            deriving (Eq, Show)
 
 data InstructionBody = Mnemonic0 String -- HALT, NOP, RESET, TRAP, TRACE,...
@@ -51,4 +50,3 @@ data InitValue = InitASCII String
                deriving (Eq, Show)
 
 data Register = Register Int deriving (Eq, Show)
-

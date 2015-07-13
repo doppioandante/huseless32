@@ -1,6 +1,6 @@
 module Huseless.Lexer where
 
-import Data.Char (digitToInt)
+import Data.Char (digitToInt, isSpace)
 import Data.List (foldl')
 import Text.Parsec
 import Text.Parsec.Combinator
@@ -111,7 +111,8 @@ lexer = Tok.makeTokenParser style
             Tok.commentLine = ";",
             Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC", "GLB", "EXT"],
             Tok.reservedOpNames = ["+", "-", "*", "="],
-            Tok.opLetter = oneOf "+-*"
+            Tok.opLetter = oneOf "+-*",
+            Tok.tokIsSpace = \c -> isSpace c && c /= '\n'
             }
 
 -- RIPOFF, thanks Parsec.Token <3
@@ -146,3 +147,4 @@ colon = Tok.colon lexer
 comma = Tok.comma lexer
 commaSep1 = Tok.commaSep1 lexer
 stringLiteral = Tok.stringLiteral lexer
+symbol = Tok.symbol lexer

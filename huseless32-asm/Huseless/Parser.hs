@@ -13,6 +13,8 @@ table = [[binary "*" Multiply]
         ,[binary "+" Plus,
           binary "-" Minus]]
 
+validNewlineBreak = many1 (optional whiteSpace <* newline <* optional whiteSpace)
+
 expression :: Parser Expression
 expression = Expr.buildExpressionParser table factor
 
@@ -28,10 +30,8 @@ factor = exprInteger <|> variable <|> parens expression
 assignment :: Parser AsmStmt
 assignment = Assignment <$> identifier <* reservedOp "=" <*> expression
 
-asmLabel :: Parser Label
-asmLabel = option EmptyLabel (
-               Label <$> identifier <* colon
-           )
+asmLabels :: Parser LabelList
+asmLabels = LabelList <$> many (identifier <* colon <* optional spaces)
 
  -- TODO: is this efficient? Maybe lazyness is saving us
 findReserved table =
@@ -114,7 +114,7 @@ instructionBody :: Parser InstructionBody
 instructionBody = try mnemonic0 <|> try mnemonic1 <|> try mnemonic2
 
 instruction :: Parser AsmStmt
-instruction = Instruction <$> asmLabel <*> instructionBody
+instruction = Instruction <$> asmLabels <*> instructionBody
 
 globalDecl :: Parser AsmStmt
 globalDecl = GlobalDecl <$ char '.' <* reserved "GLB"
@@ -159,7 +159,7 @@ pseudoInstructionBody :: Parser PseudoInstructionBody
 pseudoInstructionBody =  try pseudoDeclareStmt
                      <|> try pseudoInitStmt
 
-pseudoInstruction = PseudoInstruction <$> asmLabel <*> pseudoInstructionBody
+pseudoInstruction = PseudoInstruction <$> asmLabels <*> pseudoInstructionBody
 
 asmStmt :: Parser AsmStmt
 asmStmt = instruction
@@ -168,7 +168,9 @@ asmStmt = instruction
        <|> try globalDecl
        <|> try externDecl
 
-stmtList :: Parser [AsmStmt]
-stmtList = manyTill asmStmt eof
 
-parseProgram = parse (whiteSpace >> stmtList) ""
+
+stmtList :: Parser [AsmStmt]
+stmtList = manyTill (asmStmt <* validNewlineBreak) eof
+
+parseProgram = parse (spaces >> stmtList) ""

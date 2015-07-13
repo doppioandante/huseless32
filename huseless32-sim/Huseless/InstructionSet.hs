@@ -20,7 +20,7 @@ getAction instrClass instrCode = do
                       else Nothing
     lookup instrCode instrTable
 
-instructionTables :: Monad m => [[(Int, (Instruction -> System m ()))]]
+instructionTables :: Monad m => [[(Int, Instruction -> System m ())]]
 instructionTables = [
     controlInstructionTable,
     dataInstructionTable,
@@ -31,4 +31,3 @@ instructionTables = [
     execFlowInstructionTable,
     undefined -- inOutInstructionTable
     ]
-
