@@ -168,9 +168,12 @@ asmStmt = instruction
        <|> try globalDecl
        <|> try externDecl
 
-
-
-stmtList :: Parser [AsmStmt]
-stmtList = manyTill (asmStmt <* validNewlineBreak) eof
+stmtList :: Parser [(Int, AsmStmt)]
+stmtList = many (asmStmtWithLine <* validNewlineBreak)
+  where
+    asmStmtWithLine = do
+      pos <- getPosition
+      stmt <- asmStmt
+      return (sourceLine pos, stmt)
 
 parseProgram = parse (spaces >> stmtList) ""
