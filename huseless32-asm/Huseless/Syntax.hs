@@ -7,6 +7,7 @@ data AsmStmt = Instruction LabelList InstructionBody
              | ExternDecl [String]
              deriving (Eq, Show)
 
+-- Is this useful?
 data LabelList = LabelList [String]
            deriving (Eq, Show)
 

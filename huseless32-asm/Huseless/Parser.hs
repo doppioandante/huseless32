@@ -162,9 +162,9 @@ pseudoInstructionBody =  try pseudoDeclareStmt
 pseudoInstruction = PseudoInstruction <$> asmLabels <*> pseudoInstructionBody
 
 asmStmt :: Parser AsmStmt
-asmStmt = instruction
+asmStmt = try instruction
        <|> assignment
-       <|> pseudoInstruction
+       <|> try pseudoInstruction
        <|> try globalDecl
        <|> try externDecl
 
@@ -174,6 +174,7 @@ stmtList = many (asmStmtWithLine <* validNewlineBreak)
     asmStmtWithLine = do
       pos <- getPosition
       stmt <- asmStmt
-      return (sourceLine pos, stmt)
+      posAfter <- getPosition
+      return (max (sourceLine pos) (sourceLine posAfter), stmt)
 
 parseProgram = parse (spaces >> stmtList) ""
