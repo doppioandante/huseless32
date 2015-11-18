@@ -1,62 +1,69 @@
 module Huseless.Parser where
 
-import Text.Parsec
-import Text.Parsec.String (Parser)
-import qualified Text.Parsec.Expr as Expr
+import Control.Monad (void)
+import qualified Text.Megaparsec.Expr as Expr
+import Text.Megaparsec
+import Text.Megaparsec.String
 
-import Huseless.Lexer
+import qualified Huseless.Lexer as Lex
 import Huseless.Syntax
 
-binary s f = Expr.Infix (reservedOp s >> return (BinaryOp f)) Expr.AssocLeft
+opEqual = Lex.lexeme Lex.opEqual
+comma = Lex.lexeme Lex.comma
+colon = Lex.lexeme Lex.colon
+identifier = Lex.lexeme Lex.identifier
+signedLiteral = Lex.signedLiteral <* Lex.spaceConsumer
+stringLiteral = Lex.stringLiteral <* Lex.spaceConsumer
+
+binary name f = Expr.InfixL (Lex.symbol name >> return (BinaryOp f))
 
 table = [[binary "*" Multiply]
         ,[binary "+" Plus,
           binary "-" Minus]]
 
-validNewlineBreak = many1 (optional whiteSpace <* newline <* optional whiteSpace)
-
 expression :: Parser Expression
-expression = Expr.buildExpressionParser table factor
+expression = Expr.makeExprParser term table <?> "expression"
+
+term :: Parser Expression
+term = exprInteger <|> variable <|> Lex.parens expression
 
 variable ::  Parser Expression
 variable = Variable <$> identifier
 
 exprInteger :: Parser Expression
-exprInteger = ExprValue <$> integer
-
-factor :: Parser Expression
-factor = exprInteger <|> variable <|> parens expression
+exprInteger = ExprValue <$> signedLiteral
 
 assignment :: Parser AsmStmt
-assignment = Assignment <$> identifier <* reservedOp "=" <*> expression
+assignment = Assignment <$> identifier <* opEqual <*> expression
 
 asmLabels :: Parser LabelList
-asmLabels = LabelList <$> many (identifier <* colon <* optional spaces)
+asmLabels = LabelList <$> many (try identifier <* colon)
 
  -- TODO: is this efficient? Maybe lazyness is saving us
+ -- (edit: maybe sorting should save us)
 findReserved table =
     foldr1 (<|>) $
       (flip map) table $ \instr ->
-        try $ reserved instr >> return instr
+        try $ Lex.symbol instr
 
 mnemonic0 :: Parser InstructionBody
 mnemonic0 = do
-    name <- findReserved mnemonic0Names
+    name <- findReserved Lex.mnemonic0Names
     -- TODO: check validity early
     return $ Mnemonic0 name
 
 mnemonic1 :: Parser InstructionBody
 mnemonic1 = do
-    name <- findReserved mnemonic1Names
+    name <- findReserved Lex.mnemonic1Names
     op <- operand
     -- TODO: check validity early
     return $ Mnemonic1 name op
 
 mnemonic2 :: Parser InstructionBody
 mnemonic2 = do
-    name <- findReserved mnemonic2Names
+    name <- findReserved Lex.mnemonic2Names
     op1 <- operand
-    comma
+    Lex.comma
     op2 <- operand
     -- TODO: check validity early
     return $ Mnemonic2 name op1 op2
@@ -72,10 +79,10 @@ operand =  try direct
        <|> try incrementing
        -- <|> try device
 
-register_literal = findReserved registerNames
+register_literal = findReserved Lex.registerNames
 
 register :: Parser Register
-register = registerFromString <$> register_literal
+register = registerFromString <$> register_literal <?> "register"
     where
         registerFromString ('R':xs) = Register (read xs :: Int)
 
@@ -83,29 +90,29 @@ direct :: Parser Operand
 direct = Direct <$> register
 
 immediate :: Parser Operand
-immediate = Immediate <$ char '#' <*> expression
+immediate = Immediate <$ char '#' <*> expression <?> "immediate"
 
 absolute :: Parser Operand
-absolute = Absolute <$> expression <* notFollowedBy (symbol "(")
+absolute = Absolute <$> expression <* notFollowedBy (char '(')
 
 indirect :: Parser Operand
-indirect = Indirect <$> parens register <* notFollowedBy (reservedOp "+")
+indirect = Indirect <$> Lex.parens register <* notFollowedBy (char '+')
 
 -- NOTE: indirectOffset doesn't accept full blown expression
 indirectOffset :: Parser Operand
 indirectOffset = IndirectOffset <$> (exprInteger <|> variable)
-                                <*> parens register
+                                <*> Lex.parens register
 
 -- NOTE: relativeOffset doesn't accept full blown expression
 relativeOffset :: Parser Operand
 relativeOffset = RelativeOffset <$> (exprInteger <|> variable)
-                                <* parens (reserved "PC")
+                                <* Lex.parens (string "PC")
 
 decrementing :: Parser Operand
-decrementing = Decrementing <$ reservedOp "-" <*> parens register
+decrementing = Decrementing <$ char '-' <*> Lex.parens register
 
 incrementing :: Parser Operand
-incrementing = Incrementing <$> parens register <* reservedOp "+"
+incrementing = Incrementing <$> Lex.parens register <* char '+'
 
 device :: Parser Operand
 device = undefined
@@ -117,12 +124,12 @@ instruction :: Parser AsmStmt
 instruction = Instruction <$> asmLabels <*> instructionBody
 
 globalDecl :: Parser AsmStmt
-globalDecl = GlobalDecl <$ char '.' <* reserved "GLB"
-                        <*> commaSep1 identifier
+globalDecl = GlobalDecl <$ char '.' <* string "GLB"
+                        <*> identifier `sepBy1` comma
 
 externDecl :: Parser AsmStmt
-externDecl = ExternDecl <$ char '.' <* reserved "EXT"
-                        <*> commaSep1 identifier
+externDecl = ExternDecl <$ char '.' <* string "EXT"
+                        <*> identifier `sepBy1` comma
 
 pseudoDeclareStmt :: Parser PseudoInstructionBody
 pseudoDeclareStmt = do
@@ -141,7 +148,7 @@ initValue =  (InitASCII <$> stringLiteral)
          <|> (InitExpr <$> expression)
 
 initList :: Parser InitList
-initList = InitList <$> commaSep1 initValue
+initList = InitList <$> initValue `sepBy1` comma
 
 pseudoInitStmt :: Parser PseudoInstructionBody
 pseudoInitStmt = do
@@ -168,8 +175,11 @@ asmStmt = try instruction
        <|> try globalDecl
        <|> try externDecl
 
+comment = Lex.symbol ";" >> anyChar `manyTill` (lookAhead eol)
+newlineBreak = (void comment <|> Lex.spaceConsumer) *> eol
+
 stmtList :: Parser [(Int, AsmStmt)]
-stmtList = many (asmStmtWithLine <* validNewlineBreak)
+stmtList = many (asmStmtWithLine <* skipSome newlineBreak)
   where
     asmStmtWithLine = do
       pos <- getPosition
@@ -177,4 +187,5 @@ stmtList = many (asmStmtWithLine <* validNewlineBreak)
       posAfter <- getPosition
       return (max (sourceLine pos) (sourceLine posAfter), stmt)
 
-parseProgram = parse (spaces >> stmtList) ""
+parseProgram = parse (try (many newlineBreak) >> stmtList) ""
+-- parseProgram text = parse (space >> stmtList) "" text ++ "\n"

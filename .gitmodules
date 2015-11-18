@@ -1,3 +1,6 @@
 [submodule "huseless32-asm/parsec"]
 	path = huseless32-asm/parsec
 	url = https://github.com/doppioandante/parsec
+[submodule "huseless32-asm/megaparsec"]
+	path = huseless32-asm/megaparsec
+	url = git://github.com/mrkkrp/megaparsec.git

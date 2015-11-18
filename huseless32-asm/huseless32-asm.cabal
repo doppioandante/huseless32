@@ -17,17 +17,19 @@ cabal-version:       >=1.10
 
 executable huseless32-asm
   main-is:             Main.hs
-  other-modules:       Text.Parsec
+  other-modules:       Text.Megaparsec
   -- other-extensions:
   build-depends:       base >=4.8 && <4.9, elf >=0.27, mtl, bytestring, text
-  hs-source-dirs:      ., parsec
+  hs-source-dirs:      ., megaparsec
   default-language:    Haskell2010
 
-  extensions:
-     ExistentialQuantification,
-     PolymorphicComponents,
-     MultiParamTypeClasses,
-     FlexibleInstances,
-     FlexibleContexts,
-     DeriveDataTypeable,
-     CPP
+  default-extensions:
+                     DeriveDataTypeable
+                   , ExistentialQuantification
+                   , FlexibleContexts
+                   , FlexibleInstances
+                   , FunctionalDependencies
+                   , GeneralizedNewtypeDeriving
+                   , MultiParamTypeClasses
+                   , PolymorphicComponents
+                   , UndecidableInstances

@@ -1,15 +1,14 @@
 module Huseless.Lexer where
 
-import Data.Char (digitToInt, isSpace)
+import Control.Applicative
+import Control.Monad (void)
+import Data.Char (digitToInt, isSpace, isLetter, isAlphaNum)
 import Data.List (foldl')
-import Text.Parsec
-import Text.Parsec.Combinator
-import Text.Parsec.Char
-import Text.Parsec.String (Parser)
-import Text.Parsec.Language (emptyDef)
-
-import qualified Text.Parsec.Token as Tok
-
+import Text.Megaparsec.Combinator (between)
+import qualified Text.Megaparsec.Lexer as L (hexadecimal, skipLineComment, skipBlockComment, space, decimal, signed, symbol, lexeme, charLiteral)
+import Text.Megaparsec.Prim (Stream, ParsecT)
+import Text.Megaparsec (oneOf, char, (<?>), skipSome, satisfy, unexpected, manyTill, skipMany)
+import Text.Megaparsec.String
 
 mnemonic0Names = [
     "HALT",
@@ -103,48 +102,61 @@ mnemonic2Names = [
 
 registerNames = ['R':[idx] | idx <- ['0' .. '7']]
 
-lexer :: Tok.TokenParser ()
-lexer = Tok.makeTokenParser style
+mnemonicNames = mnemonic0Names ++ mnemonic1Names ++ mnemonic2Names
+reservedNames = mnemonicNames ++ registerNames ++ ["PC", "GLB", "EXT"]
+--        style = emptyDef {
+--            Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC", "GLB", "EXT"],
+--            Tok.reservedOpNames = ["+", "-", "*", "="],
+--            Tok.opLetter = oneOf "+-*",
+--            Tok.tokIsSpace = \c -> isSpace c && c /= '\n'
+--            }
+simpleSpace :: Stream s m Char => ParsecT s u m Char
+simpleSpace = satisfy (\c -> isSpace c && c /= '\n' && c /= '\r')
+
+spaceConsumer :: Stream s m Char => ParsecT s u m ()
+spaceConsumer = skipMany simpleSpace
+
+nonBreakingSpace :: Stream s m Char => ParsecT s u m ()
+nonBreakingSpace = skipSome simpleSpace <?> "non-breaking space"
+
+parens :: Stream s m Char => ParsecT s u m a -> ParsecT s u m a
+parens = between (symbol "(") (symbol ")")
+
+symbol :: Stream s m Char => String -> ParsecT s u m String
+symbol = L.symbol spaceConsumer
+lexeme :: Stream s m Char => ParsecT s u m String -> ParsecT s u m String
+lexeme = L.lexeme spaceConsumer
+
+hexLiteral :: Stream s m Char => ParsecT s u m Integer
+hexLiteral = char '$' >> L.hexadecimal <?> "hexadecimal literal"
+
+signedLiteral :: Stream s m Char => ParsecT s u m Integer
+signedLiteral = L.signed spaceConsumer (hexLiteral <|> L.decimal) <?> "integer literal"
+
+opEqual :: Stream s m Char => ParsecT s u m String
+opEqual = symbol "="
+
+comma :: Stream s m Char => ParsecT s u m String
+comma = symbol ","
+
+colon :: Stream s m Char => ParsecT s u m String
+colon = symbol ":"
+-- A valid identifier cannot start with a digit
+-- Following alphanumeric characters and '_' are valid
+-- No valid identifier can clash with opcode mnemonics or register names
+identifier :: Stream s m Char => ParsecT s u m String
+identifier = do
+    idHead <- satisfy (\c -> isLetter c || c == '_')
+    idTail <- many $ satisfy (\c -> isAlphaNum c || c == '_')
+    let id = idHead : idTail
+     in if isReserved id
+           then unexpected $ id ++ " is a reserved name"
+           else return id
     where
-        mnemonicNames = mnemonic0Names ++ mnemonic1Names ++ mnemonic2Names
-        style = emptyDef {
-            Tok.commentLine = ";",
-            Tok.reservedNames = registerNames ++ mnemonicNames ++ ["PC", "GLB", "EXT"],
-            Tok.reservedOpNames = ["+", "-", "*", "="],
-            Tok.opLetter = oneOf "+-*",
-            Tok.tokIsSpace = \c -> isSpace c && c /= '\n'
-            }
-
--- RIPOFF, thanks Parsec.Token <3
-bnumber base baseDigit = do
-    digits <- many1 baseDigit
-    let n = foldl' (\x d -> base*x + toInteger (digitToInt d)) 0 digits
-    return n
-
-hex_literal = char '$' *> bnumber 16 hexDigit
-dec_literal = bnumber 10 digit
-
-read_sign = do
-    p <- char '+' <|> char '-'
-    if p == '+'
-       then return id
-       else return negate
+        -- TODO: sort
+        isReserved name = any (== name) reservedNames
 
 
-unsigned_literal = hex_literal <|> dec_literal
+stringLiteral :: Stream s m Char => ParsecT s u m String
+stringLiteral = char '"' >> manyTill L.charLiteral (char '"')
 
-integer :: Parser Integer
-integer = Tok.lexeme lexer (
-    ($) <$> option id read_sign <*> unsigned_literal <?> "integer"
-    )
-
-parens = Tok.parens lexer
-identifier = Tok.identifier lexer
-reservedOp = Tok.reservedOp lexer
-reserved = Tok.reserved lexer
-whiteSpace = Tok.whiteSpace lexer
-colon = Tok.colon lexer
-comma = Tok.comma lexer
-commaSep1 = Tok.commaSep1 lexer
-stringLiteral = Tok.stringLiteral lexer
-symbol = Tok.symbol lexer
